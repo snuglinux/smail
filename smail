@@ -1,0 +1,176 @@
+#!/bin/bash
+
+SMAIL_VER=0.0.0
+INSTALL_PREFIX=/usr
+SMAIL_DEBUG=0
+SMAIL_DIR=${INSTALL_PREFIX}/share/smail
+CONFIG_FILE=/etc/smail.conf
+
+lang=`echo $LANG | cut -b 1,2`
+
+#Loading message file
+if [ -f "${SMAIL_DIR}/smail.messages" ]; then
+   . "${SMAIL_DIR}/smail.messages"
+else
+  case $lang in
+       ru) echo -e "\e[31mОшибка:\e[0m не найден файл smail.messages в '${SMAIL_DIR}'!!!";;
+       uk) echo -e "\e[31mПомилка:\e[0m не знайдений файл smail.messages у '${SMAIL_DIR}'!!!";;
+       *)  echo -e "\e[31mError:\e[0m file smail.messages not found in '${SMAIL_DIR}'!!!";;
+  esac
+  exit 1
+fi
+
+if ! [ -f $CONFIG_FILE ]; then
+   show_message NOT_FOUND_CONFIG
+   exit 1
+fi
+
+if [[ $EUID -ne 0 ]]; then
+   show_message I_M_NOT_ROOT
+   exit 1
+fi
+
+if [[ $# -eq 0 ]]; then
+   show_message SHOW_USAGE
+   exit
+fi
+
+#========================
+set_options(){
+  while [ ! -z "$1" ]; do
+        case $1 in
+                 -f=*)
+                    FROMADDRESS=$(echo "$1" | sed 's/-f=//')
+                    ;;
+                 -t=*)
+                    TOADDRESS=$(echo "$1" | sed 's/-t=//')
+                    ;;
+                 -m=*)
+                    MAILFILE=$(echo "$1" | sed 's/-m=//')
+                    ;;
+                 -r=*)
+                    FROMTEXT=$(echo "$1" | sed 's/-r=//')
+                    ;;
+                 -s=*)
+                    SUBJECTTEXT=$(echo "$1" | sed 's/-s=//')
+                    ;;
+                 -v)
+                    show_message SMAIL_VER
+                    exit 1
+                    ;;
+                 -h|--help)
+                    show_message SHOW_USAGE
+                    exit 1
+                    ;;
+                 -d)
+                    SMAIL_DEBUG=1
+                    ;;
+                 *) show_message UNKNOWN_ARG $1
+                    exit 1
+                    ;;
+        esac
+        shift
+  done
+
+if [ -z $FROMADDRESS ]; then
+   show_message NOT_SPECIFIED_PARAMETER "-f (from address)"
+   exit 1
+fi
+
+if [ -z $TOADDRESS ]; then
+   show_message NOT_SPECIFIED_PARAMETER "-t (to address)"
+   exit 1
+fi
+
+if [ -z $MAILFILE ]; then
+   show_message NOT_SPECIFIED_PARAMETER "-m (mail file)"
+   exit 1
+fi
+}
+
+set_options $*
+
+check_email() {
+  local EMAIL_CHECK
+  EMAIL_CHECK=$1
+  if [[ -n $EMAIL_CHECK ]]; then
+     while [ -n $EMAIL_CHECK ] ; do
+          if [[ "$EMAIL_CHECK" =~ [@] ]]; then
+             break
+          fi
+       show_message NOT_CORRECTLY_EMAIL $EMAIL_CHECK
+       exit
+     done
+  fi
+}
+
+check_file() {
+  if [ ! -f $MAILFILE ]; then
+     show_messag CANNOT_FIND_MAIL_FILE
+     exit 1
+  fi
+  if ! grep -q 'Content-Type: text/plain; charset="utf-8"' $MAILFILE ; then
+     sed -i -e '1 s/^/Content-Type: text\/plain; charset="utf-8"\n/;' $MAILFILE
+  fi
+  if [ -n $SUBJECTTEXT ]; then
+     if ! grep -q 'Subject: ' $MAILFILE ; then
+        sed -i -e '1 s/^/'"Subject: $SUBJECTTEXT"'\n/;' $MAILFILE
+     fi
+  fi
+  if [ -n $FROMTEXT ]; then
+     FROMTEXT="$FROMADDRESS"
+  fi
+  if ! grep -q 'From: ' $MAILFILE ; then
+     sed -i -e '1 s/^/'"From: $FROMTEXT"'\n/;' $MAILFILE
+  fi
+  if ! grep -q 'To: ' $MAILFILE ; then
+     sed -i -e '1 s/^/'"To: $TOADDRESS"'\n/;' $MAILFILE
+  fi
+}
+
+check_email $FROMADDRESS
+check_email $TOADDRESS
+check_file
+
+if grep -q $FROMADDRESS $CONFIG_FILE ; then
+   MAILSERVER=`grep $FROMADDRESS /etc/smail.conf | awk '{print $2}'`
+   INV_SMTP=`grep $FROMADDRESS /etc/smail.conf | awk '{print $3}'`
+   AUTHLOGIN=`echo -n $FROMADDRESS | openssl enc -base64`
+   AUTHPASS=`grep $FROMADDRESS /etc/smail.conf | awk '{print $4}'`
+   DOMAIN=$(echo "$FROMADDRESS" | sed 's|.*@||')
+else
+  show_message NO_EMAIL_CONFIG_FILE $FROMADDRESS
+  exit 1
+fi
+
+
+imapscript () {
+  sleep 2;
+  echo "$INV_SMTP $MAILSERVER"
+  sleep 1;
+  echo "Auth Login"
+  sleep 1;
+  echo "$AUTHLOGIN"
+  sleep 1;
+  echo "$AUTHPASS"
+  sleep 1;
+  echo "Mail From: $FROMADDRESS"
+  sleep 1;
+  echo "Rcpt To: $TOADDRESS"
+  sleep 1;
+  echo "Data"
+  sleep 1;
+  while read line; do
+        echo $line
+  done < $MAILFILE
+  sleep 1;
+  echo "."
+  sleep 1;
+  echo "Quit"
+}
+
+if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
+  imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465
+else
+  `imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465 >> /dev/nul`
+fi

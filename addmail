@@ -1,0 +1,126 @@
+#!/bin/bash
+
+ADDMAIL_VER=0.0.0
+INSTALL_PREFIX=/usr
+SMAIL_DIR=${INSTALL_PREFIX}/share/smail
+CONFIG_FILE=/etc/smail.conf
+
+lang=`echo $LANG | cut -b 1,2`
+
+#Loading message file
+if [ -f "${SMAIL_DIR}/addmail.messages" ]; then
+   . "${SMAIL_DIR}/addmail.messages"
+else
+  case $lang in
+       ru) echo -e "\e[31mОшибка:\e[0m не найден файл addmail.messages в '${SMAIL_DIR}'!!!";;
+       uk) echo -e "\e[31mПомилка:\e[0m не знайдений файл addmail.messages у '${SMAIL_DIR}'!!!";;
+       *)  echo -e "\e[31mError:\e[0m file addmail.messages not found in '${SMAIL_DIR}'!!!";;
+  esac
+  exit 1
+fi
+
+#=======================
+fill_parameters() {
+  show_message ENTER_SMTP_SERVER
+  read AMSURE
+  MSMTP=$AMSURE
+  show_message INVITATION_SMTP_SERVER
+  INVSMTP="12"
+  while [ "$INVSMTP" = "${INVSMTP#*$AMSURE}" ] ; do
+      read -n 1 AMSURE
+  done
+  if [ "$AMSURE" = "1" ] ; then
+     INV_SMTP="EHLO"
+  fi
+  if [ "$AMSURE" = "2" ] ; then
+     INV_SMTP="EHLO"
+  fi
+  echo ""
+  show_message ENTER_PASSWORD
+  read -s AMSURE
+  MPASS=`echo -n $AMSURE | openssl enc -base64`
+  echo "$EMAIL_ADRESS $MSMTP $INV_SMTP $MPASS" >> $CONFIG_FILE
+}
+
+#=======================
+add_address() {
+  local AMSURE YN INV_SMTP INVSMTP MSMTP MPASS
+  YN="yn"
+  if [[ ! -n $EMAIL_ADRESS ]]; then
+     while [ -n $AMSURE ] ; do
+       show_message ENTER_EMAIL_ADDRESS
+       read AMSURE
+       if [[ -n $AMSURE ]]; then
+          if [[ "$AMSURE" =~ [@] ]]; then
+             EMAIL_ADRESS=$AMSURE
+             break
+          fi
+       fi
+       show_message NOT_CORRECTLY_EMAIL $AMSURE
+     done
+  fi
+  if grep -q $EMAIL_ADRESS $CONFIG_FILE ; then
+     show_message EMAIL_ALREADY_EXISTS
+     while [ "$YN" = "${YN#*$AMSURE}" ] ; do
+         read -n 1 AMSURE
+         echo ""
+     done
+     if [ "$AMSURE" = "y" ] ; then
+        sed -i "/$EMAIL_ADRESS/d" $CONFIG_FILE
+        fill_parameters
+     else
+        exit
+     fi
+  else
+     fill_parameters
+  fi
+}
+
+#========================
+set_options(){
+  while [ ! -z "$1" ]; do
+        case $1 in
+                 -a=*)
+                    EMAIL_ADRESS=$(echo "$1" | sed 's/-a=//')
+                    add_address
+                    chown root:root $CONFIG_FILE
+                    chmod 600 $CONFIG_FILE
+                    show_message COMPLETED_SUCCESSFULLY
+                    exit 0
+                    ;;
+                 -v)
+                    show_message ADDMAIL_VER
+                    exit 1
+                    ;;
+                 -h|--help)
+                    show_message SHOW_USAGE
+                    exit 1
+                    ;;
+                 *) show_message UNKNOWN_ARG $1
+                    exit 1
+                    ;;
+        esac
+        shift
+  done
+}
+
+if [[ $EUID -ne 0 ]]; then
+   show_message I_M_NOT_ROOT
+   exit 1
+fi
+
+if ! [ -f $CONFIG_FILE ]; then
+  touch $CONFIG_FILE
+  if ! [ -f $CONFIG_FILE ]; then
+     show_message FAILED_CREATE_CONFIG_FILE
+     exit 1
+  fi
+fi
+
+set_options $*
+
+add_address
+chown root:root $CONFIG_FILE
+chmod 600 $CONFIG_FILE
+show_message COMPLETED_SUCCESSFULLY
+

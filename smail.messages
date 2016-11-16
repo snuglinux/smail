@@ -1,0 +1,279 @@
+lang=`echo $LANG | cut -b 1,2`
+
+show_message() {
+case $1 in
+##############
+SHOW_USAGE)############################################################
+##############
+case $lang in
+ru)
+cat <<EOFUSAGE
+smail - BASH скрипт для отправки писем через SMTP SSL.
+Используются следующие опции командной строки:
+				
+ -f : (from address) Использовать адрес для отправки.
+				
+ -t : (to address) Адрес получателя.
+				
+ -m : (mail file) Файл сообщения.
+				
+ -s : (subject) Тема сообщения.
+				
+ -r : (from) Текстовое представление от кого.
+      Если не указано, будет использоваться from address.
+				
+ -d : (debug) Вывод отладочной информации.
+				
+ -v --version : Версия скрипта.
+				
+ -h --help: Показать справку и выйти.
+				
+Пример: smail -f=test@ukr.net -t=test2@ukr.net -m=~/mailfile -d -s=Test!!! -r=Admin test@ukr.net
+
+EOFUSAGE
+;;
+
+uk)
+cat <<EOFUSAGE
+smail - BASH скрипт для відправки пошти через SMTP, SSL.
+Використовуються наступні опції командного рядка:
+				
+ -f : (from address) Використовувати адреса для надсилання.
+				
+ -t : (to address) Адреса одержувача.
+				
+ -m : (mail file) Файл повідомлення.
+				
+ -s : (subject) Тема повідомлення.
+				
+ -r : (from) Текстове представлення від кого.
+      Якщо не вказано, буде використовуватися from address.
+				
+ -d : (debug) Виведення налагоджувальної інформації.
+				
+ -v --version : Версія скрипта.
+				
+ -h --help : Показати довідку і вийти.
+				
+Приклад: smail -f=test@ukr.net -t=test2@ukr.net -m=~/mailfile -d -s=Test!!! -r=Admin test@ukr.net
+
+EOFUSAGE
+;;
+
+*)
+cat << EOFUSAGE
+smail - BASH script to send emails via SMTP SSL.
+Use the following command line options:
+				
+ -f : (from address) Use the address to send.
+				
+ -t : (to address) The recipient's address.
+				
+ -m : (mail file) File messages.
+				
+ -s : (subject) Subject message.
+				
+ -r : (from) Text representation from anyone.
+      If not specified, will use the from address.
+				
+ -d : (debug) The debug output.
+				
+ -v --version : Version of the script.
+				
+ -h --help : Show help and exit.
+				
+Example: smail -f=test@ukr.net -t=test2@ukr.net -m=~/mailfile -d -s=Test!!! -r=Admin test@ukr.net
+
+EOFUSAGE
+;;
+esac
+;;
+
+#############
+MAILSEND_VER)
+#############
+case $lang in
+ru) echo -e "Версия скрипта ${MAILSEND_VER}"
+;;
+uk) echo -e "Версія скрипта ${MAILSEND_VER}"
+;;
+*)  echo -e "Script version ${MAILSEND_VER}"
+esac
+;;
+
+################
+FILE_NOT_FOUND)#######################################################
+################
+case $lang in 
+ru) echo -e "Файл \"$2\" не найден";;
+uk) echo -e "Файл \"$2\" не знайдено";;
+*)  echo -e "File \"$2\" not found";;
+esac
+;;
+
+###############
+UNKNOWN_ARG)##########################################################
+###############
+case $lang in
+ru) echo -e "Неизвестный аргумент $2";;
+uk) echo -e "Невідомий аргумент $2";;
+*)  echo -e "Unknown argement $2";;
+esac
+;;
+
+###############
+VAR_NOT_SET)##########################################################
+###############
+case $lang in
+ru) echo -e "Переменная \"$2\" не установлена";;
+uk) echo -e "Змінна \"$2\" не встановлена";;
+*)  echo -e "Variable \"$2\" not set";;
+esac;;
+
+################
+I_M_NOT_ROOT)##########################################################
+################
+case $lang in
+ru) echo -e "Необходимы права суперпользователя root";;
+uk) echo -e "Необхідні права суперкористувача root";;
+*)  echo -e "You need to be root";;
+esac;;
+
+###########
+NO_ARCHIVE)##############################################################
+###########
+case $lang in
+ru) echo -e "$2 не является архивом";;
+uk) echo -e "$2 не є архівом";;
+*)  echo -e "$2 is not an archive";;
+esac;;
+
+###########
+NO_CONFIG_FILE)##############################################################
+###########
+case $lang in
+ru) echo -e "Не найден файл конфигурации /etc/smail.conf";;
+uk) echo -e "Не знайдений файл конфігурації /etc/smail.conf";;
+*)  echo -e "Config file /etc/smail.conf not found";;
+esac;;
+
+###########
+WORK_DIR)##############################################################
+###########
+case $lang in
+ru) echo -e "Изменение рабочей директории на $2";;
+uk) echo -e "Зміна робочої директорії на $2";;
+*)  echo -e "Changing working dir to $2";;
+esac;;
+
+###########
+BT_DIR_NOT_WRITABLE)##############################################################
+###########
+case $lang in
+ru) echo -e "Временная директория $2 не доступна для записи";;
+uk) echo -e "Тимчасова директорія $2 не доступна для запису";;
+*)  echo -e "Temp directory $2 is not writable";;
+esac;;
+
+############
+YES_OR_NO)##############################################################i
+###########
+case $lang in
+ru) echo -e "Введите \"yes\" или \"no\"";;
+uk) echo -e "Введіть \"yes\" или \"no\"";;
+*)  echo -e "Please enter \"yes\" or \"no\"";;
+esac;;
+
+##########
+WRITING_TO*)##############################################################i
+############
+case $lang in
+ru) echo -e "Файл записан в директорию $2";;
+uk) echo -e "Файл записаний в директорію $2";;
+*)  echo -e "File be written in $2";;
+esac;;
+
+##########
+OVERWRITE_FILE*)###################################################
+############
+case $lang in
+ru) echo -e "Перезаписать файл $2";;
+uk) echo -e "Перезаписати файл $2";;
+*)  echo -e "Overwrite the file $2";;
+esac;;
+
+##########
+FAILED_TO_CREATE_DIR*)###################################################
+############
+case $lang in
+ru) echo -e "Не удалось создать каталог \e[31m$2\e[0m";;
+uk) echo -e "Не вдалося створити каталог \e[31m$2\e[0m";;
+*)  echo -e "Failed to create directory \e[31m$2\e[0m";;
+esac;;
+
+##########
+UNABLE_CONNECT_SERVER*)###################################################
+############
+case $lang in
+ru) echo -e "\e[31mНе удается подключиться к серверу: $2\e[0m";;
+uk) echo -e "\e[31mНе вдається підключитися до сервера: $2\e[0m";;
+*)  echo -e "\e[31mUnable to connect to server: $2\e[0m";;
+esac;;
+
+##########
+NOT_FOUND_CONFIG)###################################################
+############
+case $lang in
+ru) echo -e "\e[31mНе найден конфигурационный файл $CONFIGFILE\e[0m";;
+uk) echo -e "\e[31mНе знайдено конфігураційний файл $CONFIGFILE\e[0m";;
+*)  echo -e "\e[31mNot found config file $CONFIGFILE\e[0m";;
+esac;;
+
+##########
+NOT_SPECIFIED_PARAMETER*)###################################################
+############
+case $lang in
+ru) echo -e "Не указан параметр \e[31m$2\e[0m";;
+uk) echo -e "Не вказано параметр \e[31m$2\e[0m";;
+*)  echo -e "Not specified parameter \e[31m$2\e[0m";;
+esac;;
+
+##########
+CANNOT_FIND_MAIL_FILE*)###################################################
+############
+case $lang in
+ru) echo -e "Не найден текстовый файл для отправки \e[31m$2\e[0m";;
+uk) echo -e "Не знайдено текстовий файл для відправки \e[31m$2\e[0m";;
+*)  echo -e "Not found text file to send \e[31m$2\e[0m";;
+esac;;
+
+#############
+NOT_CORRECTLY_EMAIL*)
+#############
+case $lang in
+ru) echo -e "Не верно введен электронный адрес \e[31m$2\e[0m"
+;;
+uk) echo -e "Не вірно уведено електронну адресу \e[31m$2\e[0m"
+;;
+*)  echo -e "Not correctly entered email address \e[31m$2\e[0m"
+esac
+;;
+
+#############
+NO_EMAIL_CONFIG_FILE*)
+#############
+case $lang in
+ru) echo -e "Нет email \e[31m$2\e[0m в конфигурационном файле"
+;;
+uk) echo -e "Немає email \e[31m$2\e[0m в конфігураційному файлі"
+;;
+*)  echo -e "No email \e[31m$2\e[0m in the config file"
+esac
+;;
+
+*)
+echo -e "Unknown string $1";
+exit 1
+;;
+esac
+}

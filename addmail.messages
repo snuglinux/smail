@@ -1,0 +1,277 @@
+lang=`echo $LANG | cut -b 1,2`
+
+show_message() {
+case $1 in
+##############
+SHOW_USAGE)############################################################
+##############
+case $lang in
+ru)
+cat <<EOFUSAGE
+addmail - BASH скрипт для создания конфигурационного файла для smail.
+Используются следующие опции командной строки:
+				
+-a : Добавить адрес в файл конфигурации.
+				
+-v --version : Версия скрипта.
+				
+-h --help: Показать справку и выйти.
+				
+EOFUSAGE
+;;
+
+uk)
+cat <<EOFUSAGE
+addmail - BASH скрипт для створення конфігураційного файлу для smail.
+Використовуються наступні опції командного рядка:
+				
+-a : Додати адресу до файлу конфігурації.
+				
+-v --version : Версія скрипта.
+				
+-h --help : Показати довідку і вийти.
+				
+EOFUSAGE
+;;
+
+*)
+cat << EOFUSAGE
+addmail - BASH script to generate the configuration file for smail.
+Use the following command line options:
+				
+-a : Add an address to a configuration file.
+				
+-v --version : Version of the script.
+				
+-h --help : Show help and exit.
+				
+EOFUSAGE
+;;
+
+esac
+;;
+
+################
+FILE_NOT_FOUND)
+################
+case $lang in 
+ru) echo -e "Файл \"$2\" не найден";;
+uk) echo -e "Файл \"$2\" не знайдено";;
+*) echo -e "File \"$2\" not found";;
+esac
+;;
+
+###############
+UNKNOWN_ARG)
+###############
+case $lang in
+ru) echo -e "Неизвестный аргумент $2";;
+uk) echo -e "Невідомий аргумент $2";;
+*) echo -e "Unknown argement $2";;
+esac
+;;
+
+###############
+VAR_NOT_SET)
+###############
+case $lang in
+ru) echo -e "Переменная \"$2\" не установлена";;
+uk) echo -e "Змінна \"$2\" не встановлена";;
+*) echo -e "Variable \"$2\" not set";;
+esac;;
+
+################
+I_M_NOT_ROOT)
+################
+case $lang in
+ru) echo -e "Необходимы права суперпользователя root";;
+uk) echo -e "Необхідні права суперкористувача root";;
+*) echo -e "You need to be root";;
+esac;;
+
+###########
+NO_ARCHIVE)
+###########
+case $lang in
+ru) echo -e "$2 не является архивом";;
+uk) echo -e "$2 не є архівом";;
+*)  echo -e "$2 is not an archive";;
+esac;;
+
+###########
+FAILED_CREATE_FILE*)
+###########
+case $lang in
+ru) echo -e "Не удалось создать файл $2";;
+uk) echo -e "Не вдалося створити файл $2";;
+*)  echo -e "Failed to create file $2";;
+esac;;
+
+###########
+WORK_DIR)
+###########
+case $lang in
+ru) echo -e "Изменение рабочей директории на $2";;
+uk) echo -e "Зміна робочої директорії на $2";;
+*) echo -e "Changing working dir to $2";;
+esac;;
+
+###########
+BT_DIR_NOT_WRITABLE)
+###########
+case $lang in
+ru) echo -e "Временная директория $2 не доступна для записи";;
+uk) echo -e "Тимчасова директорія $2 не доступна для запису";;
+*) echo -e "Temp directory $2 is not writable";;
+esac;;
+
+############
+YES_OR_NO)
+###########
+case $lang in
+ru) echo -e "Введите \"yes\" или \"no\"";;
+uk) echo -e "Введіть \"yes\" или \"no\"";;
+*) echo -e "Please enter \"yes\" or \"no\"";;
+esac;;
+
+##########
+WRITING_TO*)
+############
+case $lang in
+ru) echo -e "Файл записан в директорию $2";;
+uk) echo -e "Файл записаний в директорію $2";;
+*) echo -e "File be written in $2";;
+esac;;
+
+##########
+OVERWRITE_FILE*)
+############
+case $lang in
+ru) echo -e "Перезаписать файл $2?";;
+uk) echo -e "Перезаписати файл $2?";;
+*) echo -e "Overwrite the file $2?";;
+esac;;
+
+##########
+FAILED_TO_CREATE_DIR*)
+############
+case $lang in
+ru) echo -e "Не удалось создать каталог \e[31m$2\e[0m";;
+uk) echo -e "Не вдалося створити каталог \e[31m$2\e[0m";;
+*) echo -e "Failed to create directory \e[31m$2\e[0m";;
+esac;;
+
+#############
+ENTER_EMAIL_ADDRESS)
+#############
+case $lang in
+ru) echo -e "Введите адрес электронной почты:"
+;;
+uk) echo -e "Bведіть адресу електронної пошти:"
+;;
+*)  echo -e "Enter email address:"
+esac
+;;
+
+#############
+NOT_CORRECTLY_EMAIL)
+#############
+case $lang in
+ru) echo -e "Не верно введен электронный адрес \e[31m$2\e[0m"
+;;
+uk) echo -e "Не вірно уведено електронну адресу \e[31m$2\e[0m"
+;;
+*)  echo -e "Not correctly entered email address \e[31m$2\e[0m"
+esac
+;;
+
+#############
+EMAIL_ALREADY_EXISTS)
+#############
+case $lang in
+ru) echo -e "Электронный адрес уже существует в файле конфигурации, желаете корректировать параметры? (\e[31my\e[0m/\e[31mn\e[0m):"
+;;
+uk) echo -e "Адреса електронної пошти вже існує у файлі конфігурації, я хочу змінити налаштування? (\e[31my\e[0m/\e[31mn\e[0m):"
+;;
+*)  echo -e "E-mail address already exists in the configuration file, I wish to adjust the settings? (\e[31my\e[0m/\e[31mn\e[0m):"
+esac
+;;
+
+#############
+ADDMAIL_VER)
+#############
+case $lang in
+ru) echo -e "Версия скрипта ${ADDMAIL_VER}"
+;;
+uk) echo -e "Версія скрипта ${ADDMAIL_VER}"
+;;
+*)  echo -e "Script version ${ADDMAIL_VER}"
+esac
+;;
+
+#############
+FAILED_CREATE_CONFIG_FILE)
+#############
+case $lang in
+ru) echo -e "Не удалось создать файл конфигурации"
+;;
+uk) echo -e "Не вдалося створити файл конфігурації"
+;;
+*)  echo -e "Failed to create the configuration file"
+esac
+;;
+
+#############
+ENTER_PASSWORD)
+#############
+case $lang in
+ru) echo -e "Введите пароль: "
+;;
+uk) echo -e "Введіть пароль: "
+;;
+*)  echo -e "Enter the password: "
+esac
+;;
+
+#############
+ENTER_SMTP_SERVER)
+#############
+case $lang in
+ru) echo -e "Введите SMTP сервер: "
+;;
+uk) echo -e "Введіть SMTP сервер: "
+;;
+*)  echo -e "Enter smtp server: "
+esac
+;;
+
+#############
+INVITATION_SMTP_SERVER)
+#############
+case $lang in
+ru) echo -e "Приглашение SMTP сервера (\e[31m1\e[0m-EHLO, \e[31m2\e[0m-HELO): "
+;;
+uk) echo -e "Запрошення SMTP сервера (\e[31m1\e[0m-EHLO, \e[31m2\e[0m-HELO): "
+;;
+*)  echo -e "Invitation to the SMTP server (\e[31m1\e[0m-EHLO, \e[31m2\e[0m-HELO): "
+esac
+;;
+
+#############
+COMPLETED_SUCCESSFULLY)
+#############
+case $lang in
+ru) echo -e "Настройка завершена успешно"
+;;
+uk) echo -e "Налаштування завершено успішно"
+;;
+*)  echo -e "Setup completed successfully "
+esac
+;;
+
+*)
+echo -e "Unknown string $1";
+exit 1
+;;
+esac
+}
