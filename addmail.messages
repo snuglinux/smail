@@ -52,17 +52,17 @@ esac
 ;;
 
 ################
-FILE_NOT_FOUND)
+FILE_NOT_FOUND*)
 ################
 case $lang in 
-ru) echo -e "Файл \"$2\" не найден";;
-uk) echo -e "Файл \"$2\" не знайдено";;
-*) echo -e "File \"$2\" not found";;
+ru) echo -e "Файл "$2" не найден";;
+uk) echo -e "Файл "$2" не знайдено";;
+*) echo -e "File "$2" not found";;
 esac
 ;;
 
 ###############
-UNKNOWN_ARG)
+UNKNOWN_ARG*)
 ###############
 case $lang in
 ru) echo -e "Неизвестный аргумент $2";;
@@ -72,12 +72,12 @@ esac
 ;;
 
 ###############
-VAR_NOT_SET)
+VAR_NOT_SET*)
 ###############
 case $lang in
-ru) echo -e "Переменная \"$2\" не установлена";;
-uk) echo -e "Змінна \"$2\" не встановлена";;
-*) echo -e "Variable \"$2\" not set";;
+ru) echo -e "Переменная "$2" не установлена";;
+uk) echo -e "Змінна "$2" не встановлена";;
+*) echo -e "Variable "$2" not set";;
 esac;;
 
 ################
@@ -90,7 +90,7 @@ uk) echo -e "Необхідні права суперкористувача root
 esac;;
 
 ###########
-NO_ARCHIVE)
+NO_ARCHIVE*)
 ###########
 case $lang in
 ru) echo -e "$2 не является архивом";;
@@ -108,7 +108,7 @@ uk) echo -e "Не вдалося створити файл $2";;
 esac;;
 
 ###########
-WORK_DIR)
+WORK_DIR*)
 ###########
 case $lang in
 ru) echo -e "Изменение рабочей директории на $2";;
@@ -117,7 +117,7 @@ uk) echo -e "Зміна робочої директорії на $2";;
 esac;;
 
 ###########
-BT_DIR_NOT_WRITABLE)
+BT_DIR_NOT_WRITABLE*)
 ###########
 case $lang in
 ru) echo -e "Временная директория $2 не доступна для записи";;
