@@ -1,0 +1,31 @@
+pkgname=smail
+pkgver=0.0.4
+pkgrel=1
+pkgdesc="smail - BASH script to send emails via SMTP SSL."
+arch=('any')
+url="https://github.com/snuglinux/${pkgname}"
+license=('GPL2')
+depends=("bash" "openssl" "grep")
+source=("https://github.com/snuglinux/${pkgname}/archive/${pkgver}.tar.gz")
+md5sums=('1b611a8e43066b1ec2244eab1d2fcecd')
+backup=( "etc/${pkgname}.conf" )
+package(){
+  cd "$srcdir/${pkgname}-${pkgver}"
+
+  # Create folders
+  install -d "${pkgdir}/etc"
+  install -d "${pkgdir}/usr/bin"
+  install -d "${pkgdir}/usr/share/doc/${pkgname}"
+  install -d "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -d "${pkgdir}/usr/share/${pkgname}"
+
+  # Copy files
+  install -m755 ${pkgname}     "${pkgdir}/usr/bin"
+  install -m755 addmail        "${pkgdir}/usr/bin"
+  install -m644 README.md      "${pkgdir}/usr/share/doc/${pkgname}/README"
+  install -Dm 644 COPYING      "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -m644 ${pkgname}.messages  "${pkgdir}/usr/share/${pkgname}"
+  install -m644 addmail.messages     "${pkgdir}/usr/share/${pkgname}"
+  sed -e "s/CURRENT_VERSION=0.0.0/CURRENT_VERSION=${pkgver}/" -i "${pkgdir}/usr/bin/${pkgname}"
+}
+
