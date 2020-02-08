@@ -106,7 +106,7 @@ check_email() {
 
 check_file() {
   if [ ! -f $MAILFILE ]; then
-     show_messag CANNOT_FIND_MAIL_FILE
+     show_message CANNOT_FIND_MAIL_FILE
      exit 1
   fi
   if ! grep -q 'Content-Type: text/plain; charset="utf-8"' $MAILFILE ; then

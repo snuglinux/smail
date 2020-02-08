@@ -33,7 +33,7 @@ fill_parameters() {
      INV_SMTP="EHLO"
   fi
   if [ "$AMSURE" = "2" ] ; then
-     INV_SMTP="EHLO"
+     INV_SMTP="HELO"
   fi
   echo ""
   show_message ENTER_PASSWORD
