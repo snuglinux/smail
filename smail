@@ -83,14 +83,11 @@ if [ -z $TOADDRESS ]; then
    exit 1
 fi
 
-if [ -z ${MAIL_FILE} ]; then
-   show_message NOT_SPECIFIED_PARAMETER "-m (mail file)"
-   exit 1
-fi
 }
 
 set_options $*
 
+#========================
 check_email() {
   local EMAIL_CHECK
   EMAIL_CHECK=$1
@@ -105,8 +102,13 @@ check_email() {
   fi
 }
 
+#========================
 check_file() {
-  if [ ! -f ${MAIL_FILE} ]; then
+  if [ -z ${MAIL_FILE} ]; then
+     MAIL_FILE="/tmp/smail"
+     echo > ${MAIL_FILE}
+  fi
+  if ! [ -f ${MAIL_FILE} ]; then
      show_message CANNOT_FIND_MAIL_FILE
      exit 1
   fi
@@ -149,7 +151,7 @@ else
   exit 1
 fi
 
-
+#========================
 imapscript () {
   sleep 2;
   echo "$INV_SMTP $MAILSERVER"
