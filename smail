@@ -112,7 +112,9 @@ check_file() {
      show_message CANNOT_FIND_MAIL_FILE
      exit 1
   fi
-  cp ${MAIL_FILE} ${MAIL_FILE_TEMP}
+  if [ "${MAIL_FILE}" != "${MAIL_FILE_TEMP}" ]; then
+     cp ${MAIL_FILE} ${MAIL_FILE_TEMP}
+  fi
   local STR1=`sed '1!D' ${MAIL_FILE_TEMP}`
   if ! [ -z "${STR1}" ]; then
        sed -i -e '1 s/^/\n/;' ${MAIL_FILE_TEMP}
@@ -180,7 +182,7 @@ imapscript () {
 if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
   imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465
 else
-  `imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465 >> /dev/nul`
+  `imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465 >> /dev/null`
 fi
 
 if [ -f ${MAIL_FILE_TEMP} ]; then
