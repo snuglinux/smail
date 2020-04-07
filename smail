@@ -36,56 +36,49 @@ if [[ $# -eq 0 ]]; then
    exit
 fi
 
-#========================
-set_options(){
-  while [ ! -z "$1" ]; do
-        case $1 in
-                 -f=*)
-                    FROMADDRESS=$(echo "$1" | sed 's/-f=//')
-                    ;;
-                 -t=*)
-                    TOADDRESS=$(echo "$1" | sed 's/-t=//')
-                    ;;
-                 -m=*)
-                    MAIL_FILE=$(echo "$1" | sed 's/-m=//')
-                    ;;
-                 -r=*)
-                    FROMTEXT=$(echo "$1" | sed 's/-r=//')
-                    ;;
-                 -s=*)
-                    SUBJECTTEXT=$(echo "$1" | sed 's/-s=//')
-                    ;;
-                 -v)
-                    show_message SMAIL_VER
-                    exit 1
-                    ;;
-                 -h|--help)
-                    show_message SHOW_USAGE
-                    exit 1
-                    ;;
-                 -d)
-                    SMAIL_DEBUG=1
-                    ;;
-                 *) show_message UNKNOWN_ARG $1
-                    exit 1
-                    ;;
-        esac
-        shift
-  done
+while getopts "f:t:m:r:s:vhd" OPT ; do
+   case $OPT in
+         f)
+            FROMADDRESS=$(echo "$OPTARG" | sed 's/=//')
+            ;;
+         t)
+            TOADDRESS=$(echo "$OPTARG" | sed 's/=//')
+            ;;
+         m)
+            MAIL_FILE=$(echo "$OPTARG" | sed 's/=//')
+            ;;
+         r)
+            FROMTEXT=$(echo "$OPTARG" | sed 's/=//')
+            ;;
+         s)
+            SUBJECTTEXT=$(echo "$OPTARG" | sed 's/=//')
+            ;;
+         v)
+            show_message SMAIL_VER
+            exit 1
+            ;;
+         h)
+            show_message SHOW_USAGE
+            exit 1
+            ;;
+         d)
+            SMAIL_DEBUG=1
+            ;;
+         *) show_message UNKNOWN_ARG $OPTARG
+            exit 1
+            ;;
+    esac
+done
 
-if [ -z $FROMADDRESS ]; then
-   show_message NOT_SPECIFIED_PARAMETER "-f (from address)"
-   exit 1
+if [ -z "$FROMADDRESS" ]; then
+    show_message NOT_SPECIFIED_PARAMETER "-f (from address)"
+    exit 1
 fi
 
-if [ -z $TOADDRESS ]; then
+if [ -z "$TOADDRESS" ]; then
    show_message NOT_SPECIFIED_PARAMETER "-t (to address)"
    exit 1
 fi
-
-}
-
-set_options $*
 
 #========================
 check_email() {
@@ -104,11 +97,11 @@ check_email() {
 
 #========================
 check_file() {
-  if [ -z ${MAIL_FILE} ]; then
+  if [ -z "${MAIL_FILE}" ]; then
      MAIL_FILE="/tmp/smail"
      echo > ${MAIL_FILE}
   fi
-  if ! [ -f ${MAIL_FILE} ]; then
+  if ! [ -f "${MAIL_FILE}" ]; then
      show_message CANNOT_FIND_MAIL_FILE
      exit 1
   fi
@@ -122,12 +115,12 @@ check_file() {
   if ! grep -q 'Content-Type: text/plain; charset="utf-8"' ${MAIL_FILE_TEMP} ; then
      sed -i -e '1 s/^/Content-Type: text\/plain; charset="utf-8"\n/;' ${MAIL_FILE_TEMP}
   fi
-  if [ -n $SUBJECTTEXT ]; then
+  if [ -n "$SUBJECTTEXT" ]; then
      if ! grep -q 'Subject: ' ${MAIL_FILE_TEMP} ; then
         sed -i -e '1 s/^/'"Subject: $SUBJECTTEXT"'\n/;' ${MAIL_FILE_TEMP}
      fi
   fi
-  if [ -n $FROMTEXT ]; then
+  if [ -n "$FROMTEXT" ]; then
      FROMTEXT="$FROMADDRESS"
   fi
   if ! grep -q 'From: ' ${MAIL_FILE_TEMP} ; then
