@@ -90,14 +90,14 @@ esac
 ;;
 
 #############
-MAILSEND_VER)
+SMAIL_VER)
 #############
 case $lang in
-ru) echo -e "Версия скрипта ${MAILSEND_VER}"
+ru) echo -e "Версия скрипта ${SMAIL_VER}"
 ;;
-uk) echo -e "Версія скрипта ${MAILSEND_VER}"
+uk) echo -e "Версія скрипта ${SMAIL_VER}"
 ;;
-*)  echo -e "Script version ${MAILSEND_VER}"
+*)  echo -e "Script version ${SMAIL_VER}"
 esac
 ;;
 
