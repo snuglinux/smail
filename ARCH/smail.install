@@ -8,7 +8,9 @@ pre_install() {
 }
 
 post_install() {
-  chown -R ${USER}:${GROUP} /etc/smail.conf
+  echo "Change files permissions"
+  chown ${USER}:${GROUP} /bin/smail
+  chown ${USER}:${GROUP} /etc/smail.conf
   chown -R ${USER}:${GROUP} /usr/share/smail
   chown -R ${USER}:${GROUP} /var/log/smail
 }
