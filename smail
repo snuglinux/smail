@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SMAIL_VER=0.0.9
+SMAIL_VER=0.0.0
 BASE_NAME=`basename "$0"`
 INSTALL_PREFIX=/usr
 SMAIL_DEBUG=0
@@ -10,6 +10,58 @@ MAIL_FILE_TEMP="/tmp/smail"
 LOG_PATH="/var/log/${BASE_NAME}"
 
 lang=`echo $LANG | cut -b 1,2`
+
+#=======================================
+# Убрать из лога color scheme
+# Strip escape codes/sequences [$1: input, $2: target variable]
+function strip_escape_codes() {
+   local input="${1//\"/\\\"}" output="" i char within_code=0
+   for ((i=0; i < ${#input}; ++i)); do
+       # get current character
+       char="${input:i:1}"
+       # if we're currently within an escape code, check if end of
+       if (( ${within_code} == 1 )); then
+          # code is reached, i.e. if current character is a letter
+          case "${char}" in
+             [a-zA-Z]) within_code=0 ;;
+             # we're no longer within an escape code
+          esac
+             continue
+       fi
+       # if current character is '\e', we've reached an escape code
+       if [[ "${char}" == $'\e' ]]; then
+          # now we're within an escape code
+          within_code=1
+          continue
+       fi
+       # if none of the above applies, add current character to output
+       output+="${char}"
+   done
+   # assign output to target variable
+   eval "$2=\"${output}\""
+}
+
+#=======================================
+echo_log(){
+  if ! [ -d ${LOG_PATH} ]; then
+     mkdir ${LOG_PATH}
+  fi
+  strip_escape_codes "$*" stripped
+  echo "$(date +%k:%M:%S): $stripped" >> ${LOG_PATH}/$(date +%Y.%m.%d)-${BASE_NAME}.log
+  chmod 660 ${LOG_PATH}/$(date +%Y.%m.%d)-${BASE_NAME}.log
+  echo -e $*
+}
+
+#=======================================
+show_message_log(){
+   if ! [ -d ${LOG_PATH} ]; then
+      mkdir ${LOG_PATH}
+   fi
+   strip_escape_codes "$(show_message $*)" stripped
+   echo "$(date +%k:%M:%S): $stripped" >> ${LOG_PATH}/$(date +%Y.%m.%d)-${BASE_NAME}.log
+   chmod 660 ${LOG_PATH}/$(date +%Y.%m.%d)-${BASE_NAME}.log
+   show_message $*
+}
 
 #Loading message file
 if [ -f "${SMAIL_DIR}/smail.messages" ]; then
@@ -72,6 +124,16 @@ while getopts "f:t:m:r:s:vhd" OPT ; do
     esac
 done
 
+if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
+   show_message_log PARAMETERS_USED
+   echo_log "-f (from address)=$FROMADDRESS"
+   echo_log "-t (to address)=$TOADDRESS"
+   echo_log "-m (mail file)=$MAIL_FILE"
+   echo_log "-r (from)=$FROMTEXT"
+   echo_log "-s (subject)=$SUBJECTTEXT"
+   echo_log "-d (debug)=$SMAIL_DEBUG"
+fi
+
 if [ -z "$FROMADDRESS" ]; then
     show_message_log NOT_SPECIFIED_PARAMETER "-f (from address)"
     exit 1
@@ -81,56 +143,6 @@ if [ -z "$TOADDRESS" ]; then
    show_message_log NOT_SPECIFIED_PARAMETER "-t (to address)"
    exit 1
 fi
-
-#=======================================
-# Убрать из лога color scheme
-# Strip escape codes/sequences [$1: input, $2: target variable]
-function strip_escape_codes() {
-   local input="${1//\"/\\\"}" output="" i char within_code=0
-   for ((i=0; i < ${#input}; ++i)); do
-       # get current character
-       char="${input:i:1}"
-       # if we're currently within an escape code, check if end of
-       if (( ${within_code} == 1 )); then
-          # code is reached, i.e. if current character is a letter
-          case "${char}" in
-             [a-zA-Z]) within_code=0 ;;
-             # we're no longer within an escape code
-          esac
-             continue
-       fi
-       # if current character is '\e', we've reached an escape code
-       if [[ "${char}" == $'\e' ]]; then
-          # now we're within an escape code
-          within_code=1
-          continue
-       fi
-       # if none of the above applies, add current character to output
-       output+="${char}"
-   done
-   # assign output to target variable
-   eval "$2=\"${output}\""
-}
-
-#=======================================
-echo_log(){
-  if ! [ -d ${LOG_PATH} ]; then
-     mkdir ${LOG_PATH}
-  fi
-  strip_escape_codes "$*" stripped
-  echo "$(date +%k:%M:%S): $stripped" >> ${LOG_PATH}/$(date +%Y.%m.%d)-${BASE_NAME}.log
-  echo -e $*
-}
-
-#=======================================
-show_message_log(){
-   if ! [ -d ${LOG_PATH} ]; then
-      mkdir ${LOG_PATH}
-   fi
-   strip_escape_codes "$(show_message $*)" stripped
-   echo "$(date +%k:%M:%S): $stripped" >> ${LOG_PATH}/$(date +%Y.%m.%d)-${BASE_NAME}.log
-   show_message $*
-}
 
 #========================
 check_email() {
@@ -225,11 +237,21 @@ imapscript () {
 }
 
 if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
-  imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465
-else
+  show_message_log EXECUTION_FUNCTION "imapscript"
   `imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465 >> /dev/null`
+else
+  imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465
 fi
-
+if [ $? != 0 ]; then
+   show_message_log FUNCTION_FAILURE "imapscript"
+fi
 if [ -f ${MAIL_FILE_TEMP} ]; then
    rm -f ${MAIL_FILE_TEMP}
+   if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
+      if ! [ -f ${MAIL_FILE_TEMP} ]; then
+         show_message_log FILE_DELETED ${MAIL_FILE_TEMP}
+      else
+         show_message_log FAILED_DELETE_FILE ${MAIL_FILE_TEMP}
+      fi
+   fi
 fi
