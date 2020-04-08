@@ -89,7 +89,7 @@ if [[ $# -eq 0 ]]; then
    show_message_log SHOW_USAGE
    exit
 fi
-
+set -x
 while getopts "f:t:m:r:s:vhd" OPT ; do
    case $OPT in
          f)
@@ -105,7 +105,7 @@ while getopts "f:t:m:r:s:vhd" OPT ; do
             FROMTEXT=$(echo "$OPTARG" | sed 's/=//')
             ;;
          s)
-            SUBJECTTEXT=$(echo "$OPTARG" | sed 's/=//' | sed 's/_//')
+            SUBJECTTEXT=$(echo "$OPTARG" | sed 's/=//' | sed 's/_//g')
             ;;
          v)
             show_message_log SMAIL_VER
@@ -123,7 +123,7 @@ while getopts "f:t:m:r:s:vhd" OPT ; do
             ;;
     esac
 done
-
+exit
 if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
    show_message_log PARAMETERS_USED
    echo_log "-f (from address)=$FROMADDRESS"
