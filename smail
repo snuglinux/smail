@@ -105,7 +105,7 @@ while getopts "f:t:m:r:s:vhd" OPT ; do
             FROMTEXT=$(echo "$OPTARG" | sed 's/=//')
             ;;
          s)
-            SUBJECTTEXT=$(echo "$OPTARG" | sed 's/=//')
+            SUBJECTTEXT=$(echo "$OPTARG" | sed 's/=//' | sed 's/_//')
             ;;
          v)
             show_message_log SMAIL_VER
