@@ -89,7 +89,7 @@ if [[ $# -eq 0 ]]; then
    show_message_log SHOW_USAGE
    exit
 fi
-set -x
+
 while getopts "f:t:m:r:s:vhd" OPT ; do
    case $OPT in
          f)
@@ -123,7 +123,7 @@ while getopts "f:t:m:r:s:vhd" OPT ; do
             ;;
     esac
 done
-exit
+
 if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
    show_message_log PARAMETERS_USED
    echo_log "-f (from address)=$FROMADDRESS"
@@ -238,9 +238,9 @@ imapscript () {
 
 if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
   show_message_log EXECUTION_FUNCTION "imapscript"
-  `imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465 >> /dev/null`
-else
   imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465
+else
+  `imapscript | openssl s_client -ign_eof -connect $MAILSERVER:465 >> /dev/null`
 fi
 if [ $? != 0 ]; then
    show_message_log FUNCTION_FAILURE "imapscript"
