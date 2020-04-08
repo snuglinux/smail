@@ -22,6 +22,8 @@ smail - BASH скрипт для отправки писем через SMTP SSL
  -r : (from) Текстовое представление от кого.
       Если не указано, будет использоваться from address.
 				
+ -c : (clean) После отправки удалить (mail file) файл.
+				
  -d : (debug) Вывод отладочной информации.
 				
  -v : Версия скрипта.
@@ -49,6 +51,8 @@ smail - BASH скрипт для відправки пошти через SMTP, 
  -r : (from) Текстове представлення від кого.
       Якщо не вказано, буде використовуватися from address.
 				
+ -c : (clean) Після відправки видалити (mail file) файл.
+				
  -d : (debug) Виведення налагоджувальної інформації.
 				
  -v : Версія скрипта.
@@ -75,6 +79,8 @@ Use the following command line options:
 				
  -r : (from) Text representation from anyone.
       If not specified, will use the from address.
+				
+ -c : (clean) After sending, delete the (mail file) file.
 				
  -d : (debug) The debug output.
 				

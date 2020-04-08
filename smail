@@ -90,7 +90,7 @@ if [[ $# -eq 0 ]]; then
    exit
 fi
 
-while getopts "f:t:m:r:s:vhd" OPT ; do
+while getopts "f:t:m:r:s:vhdc" OPT ; do
    case $OPT in
          f)
             FROMADDRESS=$(echo "$OPTARG" | sed 's/=//')
@@ -100,6 +100,9 @@ while getopts "f:t:m:r:s:vhd" OPT ; do
             ;;
          m)
             MAIL_FILE=$(echo "$OPTARG" | sed 's/=//')
+            ;;
+         c)
+            CLEAN_FILE=1
             ;;
          r)
             FROMTEXT=$(echo "$OPTARG" | sed 's/=//')
@@ -131,6 +134,7 @@ if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
    echo_log "-m (mail file)=$MAIL_FILE"
    echo_log "-r (from)=$FROMTEXT"
    echo_log "-s (subject)=$SUBJECTTEXT"
+   echo_log "-c (clean)=$CLEAN_FILE"
    echo_log "-d (debug)=$SMAIL_DEBUG"
 fi
 
@@ -252,6 +256,18 @@ if [ -f ${MAIL_FILE_TEMP} ]; then
          show_message_log FILE_DELETED ${MAIL_FILE_TEMP}
       else
          show_message_log FAILED_DELETE_FILE ${MAIL_FILE_TEMP}
+      fi
+   fi
+fi
+if [[ ${CLEAN_FILE} -eq 1 ]]; then
+   if [ -f ${MAIL_FILE} ]; then
+      rm -f ${MAIL_FILE}
+      if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
+         if ! [ -f ${MAIL_FILE} ]; then
+            show_message_log FILE_DELETED ${MAIL_FILE}
+         else
+            show_message_log FAILED_DELETE_FILE ${MAIL_FILE}
+         fi
       fi
    fi
 fi
