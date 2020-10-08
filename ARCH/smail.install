@@ -14,3 +14,7 @@ post_install() {
   chown -R ${USER}:${GROUP} /usr/share/smail
   chown -R ${USER}:${GROUP} /var/log/smail
 }
+
+post_upgrade() {
+  post_install $1
+}
