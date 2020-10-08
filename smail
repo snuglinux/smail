@@ -208,6 +208,7 @@ if grep -q $FROMADDRESS $CONFIG_FILE ; then
    INV_SMTP=`grep $FROMADDRESS /etc/smail.conf | awk '{print $3}'`
    AUTHLOGIN=`echo -n $FROMADDRESS | openssl enc -base64`
    AUTHPASS=`grep $FROMADDRESS /etc/smail.conf | awk '{print $4}'`
+   #AUTHPASS=`echo -n $AUTHPASS | openssl enc -base64`
    DOMAIN=$(echo "$FROMADDRESS" | sed 's|.*@||')
 else
   show_message_log NO_EMAIL_CONFIG_FILE $FROMADDRESS
@@ -216,6 +217,9 @@ fi
 
 #========================
 imapscript () {
+  if [[ ${SMAIL_DEBUG} -eq 1 ]]; then
+     set -x;
+  fi
   sleep 2;
   echo "$INV_SMTP $MAILSERVER"
   sleep 1;
